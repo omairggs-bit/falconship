@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FalconShip Logistics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=Space+Grotesk:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0a0d0a;
+  --ink-soft: #12160f;
+  --paper: #f4f2ea;
+  --lime: #c8f24d;
+  --lime-dim: #8fae3a;
+  --sand: #d8d3c2;
+  --line: rgba(244, 242, 234, 0.14);
+  --font-display: 'Tajawal', 'Space Grotesk', sans-serif;
+  --font-body: 'Tajawal', 'Space Grotesk', sans-serif;
+  --radius: 4px;
+  --ease: cubic-bezier(.16,.84,.44,1);
+}
+
+html[data-lang="en"] {
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'Space Grotesk', sans-serif;
+}
+html[data-lang="hi"] {
+  --font-display: 'Noto Sans Devanagari', 'Space Grotesk', sans-serif;
+  --font-body: 'Noto Sans Devanagari', 'Space Grotesk', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-body);
+  line-height: 1.5;
+  overflow-x: hidden;
+  position: relative;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}
+
+/* ===== AMBIENT SKY / FALCON TRAIL ===== */
+.sky {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.5;
+}
+.falcon-trail { width: 100%; height: 100%; }
+.falcon-trail path {
+  fill: none;
+  stroke: var(--lime);
+  stroke-width: 1;
+  stroke-dasharray: 6 10;
+  opacity: 0.25;
+  animation: trail-flow 30s linear infinite;
+}
+@keyframes trail-flow {
+  to { stroke-dashoffset: -1000; }
+}
+
+main, header, footer { position: relative; z-index: 1; }
+
+/* ===== TYPOGRAPHY BASE ===== */
+h1, h2, h3 { font-family: var(--font-display); font-weight: 900; letter-spacing: -0.01em; }
+.accent { color: var(--lime); }
+
+/* ===== HEADER ===== */
+.topbar {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(10, 13, 10, 0.86);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+.topbar__inner {
+  max-width: 1280px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 32px;
+  gap: 24px;
+}
+.brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; }
+.brand__mark { width: 34px; height: 34px; fill: var(--lime); flex-shrink: 0; }
+.brand__mark--sm { width: 26px; height: 26px; }
+.brand__text { display: flex; flex-direction: column; line-height: 1.15; }
+.brand__name { font-family: var(--font-display); font-weight: 900; font-size: 1.05rem; letter-spacing: 0.01em; }
+.brand__tag { font-size: 0.68rem; color: var(--lime-dim); font-weight: 500; }
+
+.mainnav { display: flex; gap: 28px; }
+.mainnav a {
+  color: var(--sand); text-decoration: none; font-size: 0.92rem; font-weight: 500;
+  position: relative; padding: 4px 0; white-space: nowrap;
+  transition: color 0.2s var(--ease);
+}
+.mainnav a:hover { color: var(--lime); }
+.mainnav a::after {
+  content: ''; position: absolute; bottom: -2px; left: 0; right: 0;
+  height: 2px; background: var(--lime);
+  transform: scaleX(0); transform-origin: center;
+  transition: transform 0.25s var(--ease);
+}
+.mainnav a:hover::after { transform: scaleX(1); }
+
+.topbar__actions { display: flex; align-items: center; gap: 14px; }
+.langswitch { display: flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+.langswitch__btn {
+  background: transparent; border: none; color: var(--sand);
+  font-family: var(--font-body); font-size: 0.72rem; font-weight: 700;
+  padding: 7px 13px; cursor: pointer; transition: all 0.2s var(--ease);
+}
+.langswitch__btn.is-active { background: var(--lime); color: var(--ink); }
+.langswitch__btn:not(.is-active):hover { color: var(--lime); }
+
+.burger { display: none; background: none; border: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 8px; }
+.burger span { width: 22px; height: 2px; background: var(--paper); display: block; }
+
+/* ===== HERO ===== */
+.hero { padding: 90px 32px 60px; max-width: 1280px; margin: 0 auto; }
+.hero__grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 48px; align-items: center; }
+
+.eyebrow {
+  font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em;
+  color: var(--lime-dim); text-transform: uppercase; margin-bottom: 18px;
+}
+html[data-lang="ar"] .eyebrow, html[data-lang="hi"] .eyebrow { text-transform: none; letter-spacing: 0.02em; }
+
+.hero__title {
+  font-size: clamp(2.4rem, 5vw, 4.2rem);
+  line-height: 1.05;
+  display: flex; flex-wrap: wrap; gap: 0.28em;
+  margin-bottom: 22px;
+}
+.hero__desc { font-size: 1.08rem; color: var(--sand); max-width: 46ch; margin-bottom: 34px; }
+
+.hero__cta { display: flex; gap: 16px; margin-bottom: 48px; flex-wrap: wrap; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 14px 28px; border-radius: var(--radius);
+  font-family: var(--font-body); font-weight: 700; font-size: 0.95rem;
+  text-decoration: none; cursor: pointer; border: 1.5px solid transparent;
+  transition: transform 0.2s var(--ease), background 0.2s var(--ease), border-color 0.2s var(--ease);
+}
+.btn--primary { background: var(--lime); color: var(--ink); }
+.btn--primary:hover { transform: translateY(-2px); background: #d4fa66; }
+.btn--ghost { border-color: var(--line); color: var(--paper); }
+.btn--ghost:hover { border-color: var(--lime); color: var(--lime); }
+
+.hero__stats { display: flex; gap: 40px; flex-wrap: wrap; }
+.stat { display: flex; flex-direction: column; }
+.stat__num { font-family: var(--font-display); font-size: 1.8rem; font-weight: 900; color: var(--lime); }
+.stat__label { font-size: 0.8rem; color: var(--sand); margin-top: 2px; }
+
+.hero__visual { display: flex; align-items: center; justify-content: center; }
+.falcon-hero { width: 100%; max-width: 400px; }
+.falcon-hero__ring { fill: none; stroke: var(--line); stroke-width: 1; }
+.falcon-hero__ring--dim { stroke: rgba(200, 242, 77, 0.15); }
+.falcon-hero__bird {
+  fill: var(--lime);
+  transform-origin: center;
+  animation: falcon-hover 4s ease-in-out infinite;
+}
+@keyframes falcon-hover {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(1.5deg); }
+}
+
+/* ===== STRIP ===== */
+.strip {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 0;
+  border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  max-width: 1280px; margin: 0 auto;
+}
+.strip__item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 22px 32px; flex: 1; min-width: 220px;
+  border-inline-end: 1px solid var(--line);
+  font-size: 0.88rem; font-weight: 600; color: var(--sand);
+}
+.strip__item:last-child { border-inline-end: none; }
+.ic { width: 20px; height: 20px; fill: none; stroke: var(--lime); stroke-width: 1.6; flex-shrink: 0; }
+
+/* ===== SECTIONS COMMON ===== */
+.section__title { font-size: clamp(1.8rem, 3vw, 2.6rem); text-align: center; margin-bottom: 12px; }
+.section__sub { text-align: center; color: var(--sand); margin-bottom: 48px; font-size: 1rem; }
+.section__title--sm { font-size: 1.5rem; margin-bottom: 28px; font-family: var(--font-display); font-weight: 800; }
+
+/* ===== SERVICES ===== */
+.services { max-width: 1280px; margin: 0 auto; padding: 90px 32px; }
+.cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+.card {
+  display: block;
+  background: var(--ink-soft); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 32px 24px; text-decoration: none; color: inherit; cursor: pointer;
+  transition: border-color 0.25s var(--ease), transform 0.25s var(--ease), background 0.25s var(--ease);
+}
+.card:hover { border-color: var(--lime); transform: translateY(-4px); background: rgba(200, 242, 77, 0.05); }
+.card__ic {
+  width: 30px; height: 30px; fill: none; stroke: var(--sand); stroke-width: 1.5; margin-bottom: 18px;
+  transition: stroke 0.2s var(--ease);
+}
+.card:hover .card__ic { stroke: var(--lime); }
+.card h3 { font-size: 1.15rem; margin-bottom: 10px; transition: color 0.2s var(--ease); }
+.card:hover h3 { color: var(--lime); }
+.card p { color: var(--sand); font-size: 0.92rem; margin-bottom: 14px; }
+.card__link { display: inline-block; color: var(--lime); font-size: 0.88rem; font-weight: 700; }
+
+/* ===== TOOL PANELS ===== */
+.tool { max-width: 1280px; margin: 0 auto; padding: 40px 32px 90px; }
+.tool--alt { padding-top: 0; }
+.tool__panel {
+  background: var(--ink-soft); border: 1px solid var(--line); border-radius: 8px;
+  padding: 40px; max-width: 760px; margin: 0 auto;
+}
+.tool__grid { display: grid; grid-template-columns: repeat(3, 1fr) auto; gap: 18px; align-items: end; }
+.field { display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem; color: var(--sand); font-weight: 600; }
+.field input, .field select {
+  background: var(--ink); border: 1px solid var(--line); border-radius: var(--radius);
+  color: var(--paper); padding: 12px 14px; font-family: var(--font-body); font-size: 0.95rem;
+}
+.field input:focus, .field select:focus { outline: 2px solid var(--lime); outline-offset: 1px; border-color: var(--lime); }
+.tool__btn { height: 46px; white-space: nowrap; }
+.tool__result {
+  margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--line);
+  display: flex; justify-content: space-between; align-items: baseline; font-size: 1rem;
+}
+.tool__result strong { font-family: var(--font-display); font-size: 1.6rem; color: var(--lime); }
+
+.pickup__form { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.pickup__form .field:nth-child(3) { grid-column: span 2; }
+.pickup__form button { grid-column: span 2; margin-top: 8px; }
+.pickup__success {
+  display: none; margin-top: 20px; padding: 14px 18px; border-radius: var(--radius);
+  background: rgba(200, 242, 77, 0.1); border: 1px solid var(--lime-dim); color: var(--lime);
+  font-size: 0.9rem; font-weight: 600;
+}
+.pickup__success.is-visible { display: block; }
+
+/* ===== TRACKING ===== */
+.tracking { max-width: 1000px; margin: 0 auto; padding: 90px 32px; }
+.tracking__search { display: flex; gap: 12px; max-width: 620px; margin: 0 auto 56px; }
+.tracking__search input {
+  flex: 1; background: var(--ink-soft); border: 1px solid var(--line); border-radius: var(--radius);
+  color: var(--paper); padding: 14px 18px; font-family: var(--font-body); font-size: 0.95rem;
+}
+.tracking__search input:focus { outline: 2px solid var(--lime); border-color: var(--lime); }
+
+.tracking__timeline {
+  display: flex; justify-content: space-between; position: relative; margin-bottom: 70px;
+}
+.tracking__timeline::before {
+  content: ''; position: absolute; top: 8px; left: 5%; right: 5%; height: 2px; background: var(--line);
+}
+.tl-step { display: flex; flex-direction: column; align-items: center; gap: 12px; position: relative; flex: 1; }
+.tl-dot { width: 18px; height: 18px; border-radius: 50%; background: var(--ink-soft); border: 2px solid var(--line); z-index: 1; }
+.tl-step.is-done .tl-dot { background: var(--lime); border-color: var(--lime); }
+.tl-label { font-size: 0.82rem; color: var(--sand); text-align: center; max-width: 12ch; }
+.tl-step.is-done .tl-label { color: var(--paper); font-weight: 600; }
+
+.api-box { background: var(--ink-soft); border: 1px solid var(--line); border-radius: var(--radius); padding: 28px 32px; }
+.api-box__title { font-weight: 700; margin-bottom: 16px; font-size: 0.95rem; }
+.api-box__list { list-style: none; display: flex; flex-direction: column; gap: 10px; font-family: monospace; font-size: 0.88rem; color: var(--sand); }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 0.72rem; font-weight: 700; margin-inline-end: 10px; }
+.tag--post { background: rgba(200, 242, 77, 0.18); color: var(--lime); }
+.tag--get { background: rgba(216, 211, 194, 0.15); color: var(--sand); }
+
+/* ===== REVIEWS ===== */
+.reviews { max-width: 1280px; margin: 0 auto; padding: 0 32px 100px; }
+.reviews__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.review { background: var(--ink-soft); border: 1px solid var(--line); border-radius: var(--radius); padding: 30px; }
+.review p { font-size: 0.95rem; color: var(--paper); margin-bottom: 16px; line-height: 1.6; }
+.review cite { font-size: 0.82rem; color: var(--lime-dim); font-style: normal; font-weight: 600; }
+
+/* ===== FOOTER ===== */
+.footer { border-top: 1px solid var(--line); padding: 32px; }
+.footer__inner { max-width: 1280px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+.footer__brand { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+.footer__note { color: var(--sand); font-size: 0.85rem; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 900px) {
+  .mainnav {
+    display: none; position: absolute; top: 100%; left: 0; right: 0;
+    background: var(--ink-soft); border-bottom: 1px solid var(--line);
+    flex-direction: column; padding: 20px 32px; gap: 18px;
+  }
+  .mainnav.is-open { display: flex; }
+  .burger { display: flex; }
+  .hero__grid { grid-template-columns: 1fr; }
+  .hero__visual { order: -1; max-width: 280px; margin: 0 auto; }
+  .cards { grid-template-columns: repeat(2, 1fr); }
+  .tool__grid { grid-template-columns: 1fr; }
+  .pickup__form { grid-template-columns: 1fr; }
+  .pickup__form .field:nth-child(3), .pickup__form button { grid-column: span 1; }
+  .reviews__grid { grid-template-columns: 1fr; }
+  .strip__item { border-inline-end: none; border-bottom: 1px solid var(--line); }
+}
+
+@media (max-width: 600px) {
+  .topbar__inner { padding: 12px 20px; }
+  .hero { padding: 60px 20px 40px; }
+  .cards { grid-template-columns: 1fr; }
+  .langswitch__btn { padding: 6px 9px; font-size: 0.65rem; }
+}
+
+/* Keyboard focus visibility */
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 2px solid var(--lime); outline-offset: 2px;
+}
+
+</style>
+</head>
+<body>
+
+<div class="sky" aria-hidden="true">
+  <svg class="falcon-trail" viewBox="0 0 1600 900" preserveAspectRatio="none">
+    <path id="trailPath" d="M -100 700 C 200 750, 400 300, 700 400 S 1200 150, 1700 200" />
+  </svg>
+</div>
+
+<header class="topbar">
+  <div class="topbar__inner">
+    <a href="#home" class="brand">
+      <svg class="brand__mark" viewBox="0 0 64 64" aria-hidden="true">
+        <path d="M16 8 H26 V56 H16 Z M16 8 H44 L54 20 H16 Z M16 28 H35 L43 39 H16 Z" />
+      </svg>
+      <span class="brand__text">
+        <span class="brand__name" data-i18n="brand.name">فالكون شيب</span>
+        <span class="brand__tag" data-i18n="brand.tag">شريك الخدمات اللوجستية</span>
+      </span>
+    </a>
+
+    <nav class="mainnav" id="mainnav">
+      <a href="#home" data-i18n="nav.home">الرئيسية</a>
+      <a href="#domestic" data-i18n="nav.domestic">الشحن الداخلي</a>
+      <a href="#international" data-i18n="nav.international">الشحن الدولي</a>
+      <a href="#calculator-tool" data-i18n="nav.calculator">حاسبة الأسعار</a>
+      <a href="#pickup-form" data-i18n="nav.pickup">جدولة الاستلام</a>
+      <a href="#tracking" data-i18n="nav.tracking">تتبع الشحنة</a>
+    </nav>
+
+    <div class="topbar__actions">
+      <div class="langswitch" id="langswitch">
+        <button type="button" class="langswitch__btn" data-lang-btn="ar">العربية</button>
+        <button type="button" class="langswitch__btn" data-lang-btn="en">English</button>
+        <button type="button" class="langswitch__btn" data-lang-btn="hi">हिन्दी</button>
+      </div>
+      <button class="burger" id="burgerBtn" aria-label="menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero" id="home">
+    <div class="hero__grid">
+      <div class="hero__copy">
+        <p class="eyebrow" data-i18n="hero.eyebrow">الرياض · المملكة العربية السعودية</p>
+        <h1 class="hero__title">
+          <span data-i18n="hero.title1">شحنتك</span>
+          <span class="accent" data-i18n="hero.title2">تحلّق</span>
+          <span data-i18n="hero.title3">أسرع</span>
+        </h1>
+        <p class="hero__desc" data-i18n="hero.desc">من قلب الرياض إلى كل أنحاء المملكة والعالم — شحن داخلي ودولي بموثوقية الصقر وسرعته، مع تتبّع لحظي لكل شحنة.</p>
+        <div class="hero__cta">
+          <a href="#calculator-tool" class="btn btn--primary" data-i18n="hero.ctaPrimary">احسب سعر الشحنة</a>
+          <a href="#tracking" class="btn btn--ghost" data-i18n="hero.ctaSecondary">تتبّع شحنتك</a>
+        </div>
+        <div class="hero__stats">
+          <div class="stat"><span class="stat__num">120+</span><span class="stat__label" data-i18n="hero.stat1">مدينة حول العالم</span></div>
+          <div class="stat"><span class="stat__num">24س</span><span class="stat__label" data-i18n="hero.stat2">تسليم داخل الرياض</span></div>
+          <div class="stat"><span class="stat__num">99.2٪</span><span class="stat__label" data-i18n="hero.stat3">نسبة التسليم في الموعد</span></div>
+        </div>
+      </div>
+      <div class="hero__visual">
+        <svg viewBox="0 0 420 420" class="falcon-hero" aria-hidden="true">
+          <circle cx="210" cy="210" r="190" class="falcon-hero__ring" />
+          <circle cx="210" cy="210" r="150" class="falcon-hero__ring falcon-hero__ring--dim" />
+          <path class="falcon-hero__bird" d="M140 90 H180 V330 H140 Z M140 90 H260 L300 150 H140 Z M140 175 H230 L262 220 H140 Z"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <section class="strip">
+    <div class="strip__item">
+      <svg viewBox="0 0 24 24" class="ic"><path d="M12 2 3 7v10l9 5 9-5V7z"/></svg>
+      <span data-i18n="strip.platform1">تطبيق ويب</span>
+    </div>
+    <div class="strip__item">
+      <svg viewBox="0 0 24 24" class="ic"><path d="M4 4h16v12H4z M9 20h6"/></svg>
+      <span data-i18n="strip.platform2">تتبع فوري بالذكاء الاصطناعي</span>
+    </div>
+    <div class="strip__item">
+      <svg viewBox="0 0 24 24" class="ic"><path d="M12 2 2 22h20z"/></svg>
+      <span data-i18n="strip.platform3">تغطية 3 لغات</span>
+    </div>
+    <div class="strip__item">
+      <svg viewBox="0 0 24 24" class="ic"><circle cx="12" cy="12" r="10"/></svg>
+      <span data-i18n="strip.platform4">خدمة على مدار الساعة</span>
+    </div>
+  </section>
+
+  <section class="services" id="services">
+    <h2 class="section__title"><span data-i18n="services.title">خدماتنا الأساسية</span></h2>
+    <p class="section__sub" data-i18n="services.sub">كل ما تحتاجه شحنتك، من الاستلام حتى التسليم.</p>
+
+    <div class="cards">
+      <a class="card" id="domestic" href="#domestic">
+        <svg class="card__ic" viewBox="0 0 24 24"><path d="M3 13h13l3 5H3z M6 18a2 2 0 1 0 0-4 M17 18a2 2 0 1 0 0-4"/></svg>
+        <h3 data-i18n="card.domestic.title">الشحن الداخلي</h3>
+        <p data-i18n="card.domestic.desc">توصيل سريع وآمن بين جميع مدن ومناطق المملكة العربية السعودية.</p>
+        <span class="card__link" data-i18n="card.domestic.link">عرض التفاصيل ←</span>
+      </a>
+      <a class="card" id="international" href="#international">
+        <svg class="card__ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18 M12 3a15 15 0 0 1 0 18 15 15 0 0 1 0-18"/></svg>
+        <h3 data-i18n="card.international.title">الشحن الدولي</h3>
+        <p data-i18n="card.international.desc">شبكة شحن عالمية تصل لأكثر من 120 دولة بأفضل الأسعار.</p>
+        <span class="card__link" data-i18n="card.international.link">عرض التفاصيل ←</span>
+      </a>
+      <a class="card" href="#calculator-tool">
+        <svg class="card__ic" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 7h8 M8 12h2 M13 12h2 M8 17h2"/></svg>
+        <h3 data-i18n="card.calc.title">حاسبة الأسعار</h3>
+        <p data-i18n="card.calc.desc">احسب تكلفة شحنتك فورًا حسب الوزن والوجهة ونوع الخدمة.</p>
+        <span class="card__link" data-i18n="card.calc.link">جرّب الحاسبة ←</span>
+      </a>
+      <a class="card" href="#pickup-form">
+        <svg class="card__ic" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M8 2v4 M16 2v4 M3 10h18"/></svg>
+        <h3 data-i18n="card.pickup.title">جدولة الاستلام</h3>
+        <p data-i18n="card.pickup.desc">حدد موعد استلام شحنتك من موقعك بضغطة زر.</p>
+        <span class="card__link" data-i18n="card.pickup.link">اطلب استلامًا ←</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="tool" id="calculator-tool">
+    <div class="tool__panel">
+      <h2 class="section__title--sm" data-i18n="calc.title">احسب سعر شحنتك</h2>
+      <div class="tool__grid">
+        <label class="field">
+          <span data-i18n="calc.weight">الوزن (كجم)</span>
+          <input type="number" id="calcWeight" min="0.1" step="0.1" value="5">
+        </label>
+        <label class="field">
+          <span data-i18n="calc.type">نوع الشحن</span>
+          <select id="calcType">
+            <option value="domestic" data-i18n="calc.optDomestic">داخلي</option>
+            <option value="international" data-i18n="calc.optInternational">دولي</option>
+          </select>
+        </label>
+        <label class="field">
+          <span data-i18n="calc.speed">سرعة التوصيل</span>
+          <select id="calcSpeed">
+            <option value="standard" data-i18n="calc.optStandard">عادي</option>
+            <option value="express" data-i18n="calc.optExpress">سريع</option>
+          </select>
+        </label>
+        <button class="btn btn--primary tool__btn" id="calcBtn" data-i18n="calc.btn">احسب</button>
+      </div>
+      <div class="tool__result" id="calcResult">
+        <span data-i18n="calc.resultLabel">التكلفة التقديرية:</span>
+        <strong><span id="calcPrice">75</span> <span data-i18n="calc.currency">ر.س</span></strong>
+      </div>
+    </div>
+  </section>
+
+  <section class="tool tool--alt" id="pickup-form">
+    <div class="tool__panel">
+      <h2 class="section__title--sm" data-i18n="pickup.title">جدولة استلام شحنة</h2>
+      <form class="pickup__form" id="pickupForm">
+        <label class="field">
+          <span data-i18n="pickup.name">الاسم الكامل</span>
+          <input type="text" required data-i18n-ph="pickup.namePh" placeholder="اكتب اسمك">
+        </label>
+        <label class="field">
+          <span data-i18n="pickup.phone">رقم الجوال</span>
+          <input type="tel" required placeholder="05XXXXXXXX">
+        </label>
+        <label class="field">
+          <span data-i18n="pickup.address">العنوان</span>
+          <input type="text" required data-i18n-ph="pickup.addressPh" placeholder="الحي، الشارع، المدينة">
+        </label>
+        <label class="field">
+          <span data-i18n="pickup.date">تاريخ الاستلام</span>
+          <input type="date">
+        </label>
+        <button type="submit" class="btn btn--primary" data-i18n="pickup.submit">تأكيد الطلب</button>
+      </form>
+      <p class="pickup__success" id="pickupSuccess" data-i18n="pickup.success">تم استلام طلبك! سنتواصل معك قريبًا لتأكيد الموعد.</p>
+    </div>
+  </section>
+
+  <section class="tracking" id="tracking">
+    <h2 class="section__title"><span data-i18n="tracking.title">نظام التتبع المباشر</span></h2>
+    <p class="section__sub" data-i18n="tracking.sub">أدخل رقم التتبع لمعرفة حالة شحنتك لحظيًا.</p>
+
+    <div class="tracking__search">
+      <input type="text" id="trackInput" data-i18n-ph="tracking.placeholder" placeholder="أدخل رقم التتبع، مثال: FS-2026-00123">
+      <button class="btn btn--primary" id="trackBtn" data-i18n="tracking.btn">تتبّع</button>
+    </div>
+
+    <div class="tracking__timeline" id="trackingTimeline">
+      <div class="tl-step is-done">
+        <span class="tl-dot"></span>
+        <span class="tl-label" data-i18n="tracking.step1">تم استلام الطلب</span>
+      </div>
+      <div class="tl-step is-done">
+        <span class="tl-dot"></span>
+        <span class="tl-label" data-i18n="tracking.step2">في الطريق</span>
+      </div>
+      <div class="tl-step">
+        <span class="tl-dot"></span>
+        <span class="tl-label" data-i18n="tracking.step3">خارج للتسليم</span>
+      </div>
+      <div class="tl-step">
+        <span class="tl-dot"></span>
+        <span class="tl-label" data-i18n="tracking.step4">تم التسليم</span>
+      </div>
+    </div>
+
+    <div class="api-box">
+      <p class="api-box__title" data-i18n="tracking.apiTitle">نقاط اتصال واجهة التتبع (API)</p>
+      <ul class="api-box__list">
+        <li><span class="tag tag--post">POST</span> /api/shipments</li>
+        <li><span class="tag tag--get">GET</span> /api/shipments/:trackingId</li>
+        <li><span class="tag tag--post">POST</span> /api/shipments/:trackingId/status</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="reviews">
+    <h2 class="section__title"><span data-i18n="reviews.title">آراء عملائنا</span></h2>
+    <div class="reviews__grid">
+      <blockquote class="review">
+        <p data-i18n="reviews.r1">"خدمة ممتازة وسرعة في التوصيل لم أتوقعها. فالكون شيب غيّرت تجربتي مع الشحن."</p>
+        <cite data-i18n="reviews.r1name">— سارة العتيبي، الرياض</cite>
+      </blockquote>
+      <blockquote class="review">
+        <p data-i18n="reviews.r2">"تتبع الشحنة دقيق جدًا، أعرف بالضبط أين طردي في كل لحظة."</p>
+        <cite data-i18n="reviews.r2name">— محمد القحطاني، جدة</cite>
+      </blockquote>
+      <blockquote class="review">
+        <p data-i18n="reviews.r3">"أرسلت شحنة دولية ووصلت في الوقت المحدد تمامًا. أنصح بهم بشدة."</p>
+        <cite data-i18n="reviews.r3name">— فيصل الدوسري، الدمام</cite>
+      </blockquote>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="footer__inner">
+    <div class="footer__brand">
+      <svg class="brand__mark brand__mark--sm" viewBox="0 0 64 64" aria-hidden="true">
+        <path d="M16 8 H26 V56 H16 Z M16 8 H44 L54 20 H16 Z M16 28 H35 L43 39 H16 Z" />
+      </svg>
+      <span data-i18n="brand.name">فالكون شيب</span>
+    </div>
+    <p class="footer__note" data-i18n="footer.note">© 2026 فالكون شيب. جميع الحقوق محفوظة. الرياض، المملكة العربية السعودية.</p>
+  </div>
+</footer>
+
+<script>
+const I18N = {
+  ar: {
+    dir: "rtl",
+    "brand.name": "فالكون شيب",
+    "brand.tag": "شريك الخدمات اللوجستية",
+    "nav.home": "الرئيسية",
+    "nav.domestic": "الشحن الداخلي",
+    "nav.international": "الشحن الدولي",
+    "nav.calculator": "حاسبة الأسعار",
+    "nav.pickup": "جدولة الاستلام",
+    "nav.tracking": "تتبع الشحنة",
+    "hero.eyebrow": "الرياض · المملكة العربية السعودية",
+    "hero.title1": "شحنتك",
+    "hero.title2": "تحلّق",
+    "hero.title3": "أسرع",
+    "hero.desc": "من قلب الرياض إلى كل أنحاء المملكة والعالم — شحن داخلي ودولي بموثوقية الصقر وسرعته، مع تتبّع لحظي لكل شحنة.",
+    "hero.ctaPrimary": "احسب سعر الشحنة",
+    "hero.ctaSecondary": "تتبّع شحنتك",
+    "hero.stat1": "مدينة حول العالم",
+    "hero.stat2": "تسليم داخل الرياض",
+    "hero.stat3": "نسبة التسليم في الموعد",
+    "strip.platform1": "تطبيق ويب",
+    "strip.platform2": "تتبع فوري بالذكاء الاصطناعي",
+    "strip.platform3": "تغطية 3 لغات",
+    "strip.platform4": "خدمة على مدار الساعة",
+    "services.title": "خدماتنا الأساسية",
+    "services.sub": "كل ما تحتاجه شحنتك، من الاستلام حتى التسليم.",
+    "card.domestic.title": "الشحن الداخلي",
+    "card.domestic.desc": "توصيل سريع وآمن بين جميع مدن ومناطق المملكة العربية السعودية.",
+    "card.domestic.link": "عرض التفاصيل ←",
+    "card.international.title": "الشحن الدولي",
+    "card.international.desc": "شبكة شحن عالمية تصل لأكثر من 120 دولة بأفضل الأسعار.",
+    "card.international.link": "عرض التفاصيل ←",
+    "card.calc.title": "حاسبة الأسعار",
+    "card.calc.desc": "احسب تكلفة شحنتك فورًا حسب الوزن والوجهة ونوع الخدمة.",
+    "card.calc.link": "جرّب الحاسبة ←",
+    "card.pickup.title": "جدولة الاستلام",
+    "card.pickup.desc": "حدد موعد استلام شحنتك من موقعك بضغطة زر.",
+    "card.pickup.link": "اطلب استلامًا ←",
+    "calc.title": "احسب سعر شحنتك",
+    "calc.weight": "الوزن (كجم)",
+    "calc.type": "نوع الشحن",
+    "calc.optDomestic": "داخلي",
+    "calc.optInternational": "دولي",
+    "calc.speed": "سرعة التوصيل",
+    "calc.optStandard": "عادي",
+    "calc.optExpress": "سريع",
+    "calc.btn": "احسب",
+    "calc.resultLabel": "التكلفة التقديرية:",
+    "calc.currency": "ر.س",
+    "pickup.title": "جدولة استلام شحنة",
+    "pickup.name": "الاسم الكامل",
+    "pickup.namePh": "اكتب اسمك",
+    "pickup.phone": "رقم الجوال",
+    "pickup.address": "العنوان",
+    "pickup.addressPh": "الحي، الشارع، المدينة",
+    "pickup.date": "تاريخ الاستلام",
+    "pickup.submit": "تأكيد الطلب",
+    "pickup.success": "تم استلام طلبك! سنتواصل معك قريبًا لتأكيد الموعد.",
+    "tracking.title": "نظام التتبع المباشر",
+    "tracking.sub": "أدخل رقم التتبع لمعرفة حالة شحنتك لحظيًا.",
+    "tracking.placeholder": "أدخل رقم التتبع، مثال: FS-2026-00123",
+    "tracking.btn": "تتبّع",
+    "tracking.step1": "تم استلام الطلب",
+    "tracking.step2": "في الطريق",
+    "tracking.step3": "خارج للتسليم",
+    "tracking.step4": "تم التسليم",
+    "tracking.apiTitle": "نقاط اتصال واجهة التتبع (API)",
+    "reviews.title": "آراء عملائنا",
+    "reviews.r1": "\"خدمة ممتازة وسرعة في التوصيل لم أتوقعها. فالكون شيب غيّرت تجربتي مع الشحن.\"",
+    "reviews.r1name": "— سارة العتيبي، الرياض",
+    "reviews.r2": "\"تتبع الشحنة دقيق جدًا، أعرف بالضبط أين طردي في كل لحظة.\"",
+    "reviews.r2name": "— محمد القحطاني، جدة",
+    "reviews.r3": "\"أرسلت شحنة دولية ووصلت في الوقت المحدد تمامًا. أنصح بهم بشدة.\"",
+    "reviews.r3name": "— فيصل الدوسري، الدمام",
+    "footer.note": "© 2026 فالكون شيب. جميع الحقوق محفوظة. الرياض، المملكة العربية السعودية."
+  },
+
+  en: {
+    dir: "ltr",
+    "brand.name": "FalconShip",
+    "brand.tag": "Logistics Partner",
+    "nav.home": "Home",
+    "nav.domestic": "Domestic",
+    "nav.international": "International",
+    "nav.calculator": "Price Calculator",
+    "nav.pickup": "Schedule Pickup",
+    "nav.tracking": "Track Shipment",
+    "hero.eyebrow": "Riyadh · Saudi Arabia",
+    "hero.title1": "Your shipment",
+    "hero.title2": "flies",
+    "hero.title3": "faster",
+    "hero.desc": "From the heart of Riyadh to every corner of the Kingdom and the world — domestic and international shipping with a falcon's reliability and speed, tracked in real time.",
+    "hero.ctaPrimary": "Calculate shipping cost",
+    "hero.ctaSecondary": "Track your shipment",
+    "hero.stat1": "cities worldwide",
+    "hero.stat2": "delivery within Riyadh",
+    "hero.stat3": "on-time delivery rate",
+    "strip.platform1": "Web platform",
+    "strip.platform2": "AI-powered live tracking",
+    "strip.platform3": "3-language coverage",
+    "strip.platform4": "24/7 support",
+    "services.title": "Our core services",
+    "services.sub": "Everything your shipment needs, from pickup to delivery.",
+    "card.domestic.title": "Domestic Shipping",
+    "card.domestic.desc": "Fast, secure delivery between all cities and regions of Saudi Arabia.",
+    "card.domestic.link": "View details →",
+    "card.international.title": "International Shipping",
+    "card.international.desc": "A global shipping network reaching over 120 countries at the best rates.",
+    "card.international.link": "View details →",
+    "card.calc.title": "Price Calculator",
+    "card.calc.desc": "Instantly calculate your shipping cost by weight, destination, and service type.",
+    "card.calc.link": "Try the calculator →",
+    "card.pickup.title": "Schedule Pickup",
+    "card.pickup.desc": "Book a pickup from your location with a single click.",
+    "card.pickup.link": "Request a pickup →",
+    "calc.title": "Calculate your shipping cost",
+    "calc.weight": "Weight (kg)",
+    "calc.type": "Shipping type",
+    "calc.optDomestic": "Domestic",
+    "calc.optInternational": "International",
+    "calc.speed": "Delivery speed",
+    "calc.optStandard": "Standard",
+    "calc.optExpress": "Express",
+    "calc.btn": "Calculate",
+    "calc.resultLabel": "Estimated cost:",
+    "calc.currency": "SAR",
+    "pickup.title": "Schedule a pickup",
+    "pickup.name": "Full name",
+    "pickup.namePh": "Enter your name",
+    "pickup.phone": "Phone number",
+    "pickup.address": "Address",
+    "pickup.addressPh": "District, street, city",
+    "pickup.date": "Pickup date",
+    "pickup.submit": "Confirm request",
+    "pickup.success": "Your request has been received! We'll contact you soon to confirm the time.",
+    "tracking.title": "Live tracking system",
+    "tracking.sub": "Enter your tracking number to see your shipment status in real time.",
+    "tracking.placeholder": "Enter tracking number, e.g. FS-2026-00123",
+    "tracking.btn": "Track",
+    "tracking.step1": "Order received",
+    "tracking.step2": "In transit",
+    "tracking.step3": "Out for delivery",
+    "tracking.step4": "Delivered",
+    "tracking.apiTitle": "Tracking API endpoints",
+    "reviews.title": "What our customers say",
+    "reviews.r1": "\"Excellent service and delivery speed I didn't expect. FalconShip changed my shipping experience.\"",
+    "reviews.r1name": "— Sarah Al-Otaibi, Riyadh",
+    "reviews.r2": "\"The tracking is very accurate — I know exactly where my parcel is at every moment.\"",
+    "reviews.r2name": "— Mohammed Al-Qahtani, Jeddah",
+    "reviews.r3": "\"I sent an international shipment and it arrived exactly on time. Highly recommended.\"",
+    "reviews.r3name": "— Faisal Al-Dosari, Dammam",
+    "footer.note": "© 2026 FalconShip. All rights reserved. Riyadh, Saudi Arabia."
+  },
+
+  hi: {
+    dir: "ltr",
+    "brand.name": "फ़ाल्कनशिप",
+    "brand.tag": "लॉजिस्टिक्स पार्टनर",
+    "nav.home": "होम",
+    "nav.domestic": "घरेलू शिपिंग",
+    "nav.international": "अंतरराष्ट्रीय शिपिंग",
+    "nav.calculator": "मूल्य कैलकुलेटर",
+    "nav.pickup": "पिकअप शेड्यूल करें",
+    "nav.tracking": "शिपमेंट ट्रैक करें",
+    "hero.eyebrow": "रियाद · सऊदी अरब",
+    "hero.title1": "आपकी शिपमेंट",
+    "hero.title2": "उड़ती है",
+    "hero.title3": "तेज़ी से",
+    "hero.desc": "रियाद के दिल से पूरे राज्य और दुनिया भर तक — बाज़ जैसी विश्वसनीयता और गति के साथ घरेलू और अंतरराष्ट्रीय शिपिंग, हर पार्सल की रीयल-टाइम ट्रैकिंग के साथ।",
+    "hero.ctaPrimary": "शिपिंग लागत की गणना करें",
+    "hero.ctaSecondary": "अपनी शिपमेंट ट्रैक करें",
+    "hero.stat1": "दुनिया भर के शहर",
+    "hero.stat2": "रियाद के भीतर डिलीवरी",
+    "hero.stat3": "समय पर डिलीवरी दर",
+    "strip.platform1": "वेब प्लेटफ़ॉर्म",
+    "strip.platform2": "एआई-संचालित लाइव ट्रैकिंग",
+    "strip.platform3": "3 भाषाओं में उपलब्ध",
+    "strip.platform4": "24/7 सहायता",
+    "services.title": "हमारी मुख्य सेवाएं",
+    "services.sub": "पिकअप से डिलीवरी तक, आपकी शिपमेंट के लिए हर ज़रूरी चीज़।",
+    "card.domestic.title": "घरेलू शिपिंग",
+    "card.domestic.desc": "सऊदी अरब के सभी शहरों और क्षेत्रों के बीच तेज़, सुरक्षित डिलीवरी।",
+    "card.domestic.link": "विवरण देखें ←",
+    "card.international.title": "अंतरराष्ट्रीय शिपिंग",
+    "card.international.desc": "120 से अधिक देशों तक पहुंचने वाला वैश्विक शिपिंग नेटवर्क, बेहतरीन दरों पर।",
+    "card.international.link": "विवरण देखें ←",
+    "card.calc.title": "मूल्य कैलकुलेटर",
+    "card.calc.desc": "वज़न, गंतव्य और सेवा प्रकार के आधार पर तुरंत अपनी शिपिंग लागत जानें।",
+    "card.calc.link": "कैलकुलेटर आज़माएं ←",
+    "card.pickup.title": "पिकअप शेड्यूल करें",
+    "card.pickup.desc": "एक क्लिक में अपने स्थान से पिकअप बुक करें।",
+    "card.pickup.link": "पिकअप का अनुरोध करें ←",
+    "calc.title": "अपनी शिपिंग लागत की गणना करें",
+    "calc.weight": "वज़न (किग्रा)",
+    "calc.type": "शिपिंग प्रकार",
+    "calc.optDomestic": "घरेलू",
+    "calc.optInternational": "अंतरराष्ट्रीय",
+    "calc.speed": "डिलीवरी की गति",
+    "calc.optStandard": "मानक",
+    "calc.optExpress": "एक्सप्रेस",
+    "calc.btn": "गणना करें",
+    "calc.resultLabel": "अनुमानित लागत:",
+    "calc.currency": "SAR",
+    "pickup.title": "शिपमेंट पिकअप शेड्यूल करें",
+    "pickup.name": "पूरा नाम",
+    "pickup.namePh": "अपना नाम लिखें",
+    "pickup.phone": "फ़ोन नंबर",
+    "pickup.address": "पता",
+    "pickup.addressPh": "मोहल्ला, सड़क, शहर",
+    "pickup.date": "पिकअप की तारीख़",
+    "pickup.submit": "अनुरोध की पुष्टि करें",
+    "pickup.success": "आपका अनुरोध प्राप्त हो गया है! हम समय की पुष्टि के लिए जल्द ही आपसे संपर्क करेंगे।",
+    "tracking.title": "लाइव ट्रैकिंग सिस्टम",
+    "tracking.sub": "अपनी शिपमेंट की स्थिति रीयल-टाइम में जानने के लिए ट्रैकिंग नंबर दर्ज करें।",
+    "tracking.placeholder": "ट्रैकिंग नंबर दर्ज करें, उदाहरण: FS-2026-00123",
+    "tracking.btn": "ट्रैक करें",
+    "tracking.step1": "ऑर्डर प्राप्त हुआ",
+    "tracking.step2": "ट्रांज़िट में",
+    "tracking.step3": "डिलीवरी के लिए निकला",
+    "tracking.step4": "डिलीवर हो गया",
+    "tracking.apiTitle": "ट्रैकिंग API एंडपॉइंट्स",
+    "reviews.title": "हमारे ग्राहक क्या कहते हैं",
+    "reviews.r1": "\"बेहतरीन सेवा और डिलीवरी की गति, जिसकी मुझे उम्मीद नहीं थी। फ़ाल्कनशिप ने मेरा शिपिंग अनुभव बदल दिया।\"",
+    "reviews.r1name": "— सारा अल-ओतैबी, रियाद",
+    "reviews.r2": "\"ट्रैकिंग बहुत सटीक है — मुझे हर पल पता होता है कि मेरा पार्सल कहाँ है।\"",
+    "reviews.r2name": "— मोहम्मद अल-क़हतानी, जेद्दाह",
+    "reviews.r3": "\"मैंने एक अंतरराष्ट्रीय शिपमेंट भेजी और वह ठीक समय पर पहुंची। पूरी तरह से अनुशंसित।\"",
+    "reviews.r3name": "— फ़ैसल अल-दोसरी, दम्माम",
+    "footer.note": "© 2026 फ़ाल्कनशिप। सर्वाधिकार सुरक्षित। रियाद, सऊदी अरब।"
+  }
+};
+
+function applyLanguage(lang) {
+  const dict = I18N[lang] || I18N.ar;
+  document.documentElement.setAttribute("lang", lang);
+  document.documentElement.setAttribute("dir", dict.dir);
+  document.documentElement.setAttribute("data-lang", lang);
+
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const key = el.getAttribute("data-i18n");
+    if (dict[key] !== undefined) el.textContent = dict[key];
+  });
+
+  document.querySelectorAll("[data-i18n-ph]").forEach(el => {
+    const key = el.getAttribute("data-i18n-ph");
+    if (dict[key] !== undefined) el.setAttribute("placeholder", dict[key]);
+  });
+
+  document.querySelectorAll("[data-lang-btn]").forEach(btn => {
+    btn.classList.toggle("is-active", btn.getAttribute("data-lang-btn") === lang);
+  });
+
+  localStorage.setItem("fs_lang", lang);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const saved = localStorage.getItem("fs_lang") || "ar";
+  applyLanguage(saved);
+
+  document.querySelectorAll("[data-lang-btn]").forEach(btn => {
+    btn.addEventListener("click", () => applyLanguage(btn.getAttribute("data-lang-btn")));
+  });
+});
+
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  // ---- Mobile menu toggle ----
+  const burger = document.getElementById("burgerBtn");
+  const nav = document.getElementById("mainnav");
+  if (burger && nav) {
+    burger.addEventListener("click", () => {
+      const isOpen = nav.classList.toggle("is-open");
+      burger.setAttribute("aria-expanded", String(isOpen));
+    });
+  }
+
+  // ---- Price calculator ----
+  const calcBtn = document.getElementById("calcBtn");
+  const calcWeight = document.getElementById("calcWeight");
+  const calcType = document.getElementById("calcType");
+  const calcSpeed = document.getElementById("calcSpeed");
+  const calcPrice = document.getElementById("calcPrice");
+
+  function computePrice() {
+    const weight = Math.max(parseFloat(calcWeight.value) || 0, 0.1);
+    const base = calcType.value === "international" ? 60 : 15;
+    const perKg = calcType.value === "international" ? 22 : 8;
+    const speedMultiplier = calcSpeed.value === "express" ? 1.5 : 1;
+    const price = (base + weight * perKg) * speedMultiplier;
+    calcPrice.textContent = Math.round(price);
+  }
+
+  if (calcBtn) {
+    calcBtn.addEventListener("click", computePrice);
+    [calcWeight, calcType, calcSpeed].forEach(el => el.addEventListener("change", computePrice));
+  }
+
+  // ---- Pickup form ----
+  const pickupForm = document.getElementById("pickupForm");
+  const pickupSuccess = document.getElementById("pickupSuccess");
+  if (pickupForm) {
+    pickupForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      pickupSuccess.classList.add("is-visible");
+      pickupForm.reset();
+    });
+  }
+
+  // ---- Tracking simulation ----
+  const trackBtn = document.getElementById("trackBtn");
+  const trackInput = document.getElementById("trackInput");
+  const steps = document.querySelectorAll("#trackingTimeline .tl-step");
+
+  if (trackBtn) {
+    trackBtn.addEventListener("click", () => {
+      if (!trackInput.value.trim()) return;
+      // Deterministic pseudo-random progress based on tracking number
+      const seed = trackInput.value.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
+      const doneCount = (seed % 4) + 1;
+      steps.forEach((step, i) => {
+        step.classList.toggle("is-done", i < doneCount);
+      });
+    });
+    trackInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") trackBtn.click();
+    });
+  }
+});
+
+</script>
+</body>
+</html>
